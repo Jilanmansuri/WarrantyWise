@@ -2,7 +2,7 @@ import { File, Paths } from 'expo-file-system';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { Platform } from 'react-native';
-import { DocumentRecord, Product, RepairRecord } from '../types';
+import { DocumentRecord, Product, RepairRecord, ResaleSummary } from '../types';
 import { formatCurrency, formatReadableDate } from '../utils/dateUtils';
 
 function escapeHtml(value?: string | number | null): string {
@@ -202,6 +202,101 @@ export async function generateMultiProductPdf(params: {
     `${summaryHtml}${sections}`
   );
   return exportHtmlToPdf(html, `warrantywise-portfolio-${Date.now()}.pdf`);
+}
+
+export async function generateResalePacketPdf(summary: ResaleSummary): Promise<string> {
+  const { product, warrantyMetrics, repairs, maintenances, attachedInvoices, disclaimer } = summary;
+  const repairRows =
+    repairs.length > 0
+      ? repairs
+          .map(
+            (r) => `
+          <tr>
+            <td>${escapeHtml(formatReadableDate(r.repairDate))}</td>
+            <td>${escapeHtml(r.problemDescription)}</td>
+            <td>${escapeHtml(r.repairCenter)}</td>
+            <td>${statusPillHtml(r.repairStatus)}</td>
+          </tr>`
+          )
+          .join('')
+      : `<tr><td colspan="4" style="color:#64748B;text-align:center;">No repairs recorded.</td></tr>`;
+
+  const maintRows =
+    maintenances.length > 0
+      ? maintenances
+          .map(
+            (m) => `
+          <tr>
+            <td>${escapeHtml(m.title)}</td>
+            <td>${escapeHtml(m.serviceType)}</td>
+            <td>${escapeHtml(m.lastServiceDate ? formatReadableDate(m.lastServiceDate) : '—')}</td>
+            <td>${m.history?.length || 0} visit(s)</td>
+          </tr>`
+          )
+          .join('')
+      : `<tr><td colspan="4" style="color:#64748B;text-align:center;">No maintenance schedules logged.</td></tr>`;
+
+  const invRows =
+    attachedInvoices.length > 0
+      ? attachedInvoices
+          .map(
+            (d) => `
+          <tr>
+            <td>${escapeHtml(d.title)}</td>
+            <td>${escapeHtml(d.type)}</td>
+            <td>${escapeHtml(d.fileName)}</td>
+          </tr>`
+          )
+          .join('')
+      : `<tr><td colspan="3" style="color:#64748B;text-align:center;">No attached invoices.</td></tr>`;
+
+  const body = `
+    <div class="section-card">
+      <div class="product-header">
+        <div>
+          <h2 style="margin:0;color:#0F295C;">${escapeHtml(product.brand)} ${escapeHtml(product.productName)}</h2>
+          <p style="margin:4px 0 0;color:#475569;">Verified Resale History Packet • ${escapeHtml(product.category)}</p>
+        </div>
+        <div>${statusPillHtml(warrantyMetrics.warrantyStatus)}</div>
+      </div>
+
+      <h3>Product &amp; Purchase Summary</h3>
+      <table class="kv-table">
+        <tr><th>Brand / Model</th><td>${escapeHtml(product.brand)} ${escapeHtml(product.modelNumber || '')}</td><th>Masked Serial</th><td>${escapeHtml(product.serialNumber || '—')}</td></tr>
+        <tr><th>Purchase Date</th><td>${escapeHtml(formatReadableDate(product.purchaseDate))}</td><th>Product Age</th><td>${summary.productAgeMonths} month(s) (${summary.productAgeDays} days)</td></tr>
+        <tr><th>Original Price</th><td>${escapeHtml(formatCurrency(product.purchasePrice, product.currency))}</td><th>Seller</th><td>${escapeHtml(product.sellerName || '—')}</td></tr>
+        <tr><th>Remaining Warranty</th><td>${warrantyMetrics.remainingDays} day(s)</td><th>Transferable</th><td>${product.warrantyTransferable ? 'Yes (Transferable)' : 'Check manufacturer terms'}</td></tr>
+      </table>
+
+      <h3>Repair History (${repairs.length})</h3>
+      <table class="data-table">
+        <thead><tr><th>Date</th><th>Issue</th><th>Service Center</th><th>Status</th></tr></thead>
+        <tbody>${repairRows}</tbody>
+      </table>
+
+      <h3>Maintenance History (${maintenances.length})</h3>
+      <table class="data-table">
+        <thead><tr><th>Schedule</th><th>Type</th><th>Last Service</th><th>Completed Visits</th></tr></thead>
+        <tbody>${maintRows}</tbody>
+      </table>
+
+      <h3>Recorded Invoices &amp; Supporting Documents</h3>
+      <table class="data-table">
+        <thead><tr><th>Document</th><th>Category</th><th>File Name</th></tr></thead>
+        <tbody>${invRows}</tbody>
+      </table>
+
+      <p style="margin-top:14px;padding:10px;background:#FEF3C7;color:#92400E;border-radius:6px;font-size:11px;">
+        <strong>Disclaimer:</strong> ${escapeHtml(disclaimer)}
+      </p>
+    </div>
+  `;
+
+  const html = wrapReportDocument(
+    `Product Resale Packet — ${product.brand} ${product.productName}`,
+    body
+  );
+  return exportHtmlToPdf(html, `warrantywise-resale-${product.id}.pdf`);
 }
 
 async function exportHtmlToPdf(html: string, filename: string): Promise<string> {

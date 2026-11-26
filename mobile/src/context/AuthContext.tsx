@@ -4,6 +4,7 @@ import {
   extractErrorMessage,
   registerUnauthorizedHandler,
 } from '../services/api';
+import { clearAllScheduledNotifications } from '../services/notifications';
 import {
   deleteAuthToken,
   getAuthToken,
@@ -41,6 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = useCallback(async () => {
     await deleteAuthToken();
+    await clearAllScheduledNotifications().catch(() => undefined);
     setUser(null);
     setNotificationPreferences(null);
   }, []);
@@ -51,30 +53,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }, [signOut]);
 
-  const bootstrap = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const [onboarded, token] = await Promise.all([isOnboardingCompleted(), getAuthToken()]);
-      setHasCompletedOnboarding(onboarded);
-
-      if (token) {
-        const me = await authApi.getMe();
-        setUser(me.user);
-        setNotificationPreferences(me.notificationPreferences);
-      } else {
-        setUser(null);
-      }
-    } catch {
-      await deleteAuthToken();
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    void bootstrap();
-  }, [bootstrap]);
+    let active = true;
+    (async () => {
+      try {
+        const [onboarded, token] = await Promise.all([isOnboardingCompleted(), getAuthToken()]);
+        if (!active) return;
+        setHasCompletedOnboarding(onboarded);
+
+        if (token) {
+          const me = await authApi.getMe();
+          if (!active) return;
+          setUser(me.user);
+          setNotificationPreferences(me.notificationPreferences);
+        } else {
+          setUser(null);
+        }
+      } catch {
+        await deleteAuthToken();
+        if (active) setUser(null);
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const signIn = async (email: string, password: string) => {
     setAuthError(null);
