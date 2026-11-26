@@ -1,98 +1,85 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Redirect } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { Animated, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator } from 'react-native-paper';
+import { useAuth } from '../context/AuthContext';
+import { Palette, Spacing } from '../theme/tokens';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+export default function SplashGateScreen() {
+  const { user, isLoading, hasCompletedOnboarding } = useAuth();
+  const [fadeAnim] = useState(() => new Animated.Value(0));
+  const [scaleAnim] = useState(() => new Animated.Value(0.92));
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 1, duration: 450, useNativeDriver: true }),
+      Animated.spring(scaleAnim, { toValue: 1, tension: 70, friction: 9, useNativeDriver: true }),
+    ]).start();
+  }, [fadeAnim, scaleAnim]);
+
+  if (!isLoading) {
+    if (!hasCompletedOnboarding) {
+      return <Redirect href="/onboarding" />;
+    }
+    if (!user) {
+      return <Redirect href="/(auth)/login" />;
+    }
+    return <Redirect href="/(tabs)" />;
   }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
-
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+    <View style={styles.container}>
+      <Animated.View
+        style={[
+          styles.brandBlock,
+          { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
+        ]}
+      >
+        <View style={styles.logoBox}>
+          <MaterialCommunityIcons name="shield-check" size={52} color="#FFFFFF" />
+        </View>
+        <Text style={styles.title}>WarrantyWise</Text>
+        <Text style={styles.subtitle}>Smart Product Warranty &amp; Repair Manager</Text>
+        <ActivityIndicator color={Palette.primary} style={styles.loader} />
+      </Animated.View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
+    backgroundColor: Palette.background,
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    padding: Spacing.xl,
+  },
+  brandBlock: {
+    alignItems: 'center',
+  },
+  logoBox: {
+    width: 92,
+    height: 92,
+    borderRadius: 24,
+    backgroundColor: Palette.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.lg,
   },
   title: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: Palette.primary,
+    letterSpacing: -0.5,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: Palette.textSecondary,
+    marginTop: 6,
     textAlign: 'center',
   },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  loader: {
+    marginTop: Spacing.xxl,
   },
 });
