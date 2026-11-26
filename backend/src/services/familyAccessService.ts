@@ -1,6 +1,6 @@
 import { FamilyMember, IFamilyMember } from '../models/FamilyMember';
 import { IProduct, Product } from '../models/Product';
-import { AppError } from '../utils/AppError';
+import { AppError } from '../utils';
 
 export interface ProductAccessResult {
   product: IProduct;

@@ -15,10 +15,7 @@ import {
   View,
 } from 'react-native';
 import { ActivityIndicator, Button, Chip, Searchbar, TextInput } from 'react-native-paper';
-import { AppCard } from '../../components/ui/AppCard';
-import { EmptyState } from '../../components/ui/EmptyState';
-import { ErrorBanner } from '../../components/ui/ErrorBanner';
-import { OfflineBanner } from '../../components/ui/OfflineBanner';
+import { AppCard, EmptyState, ErrorBanner, OfflineBanner } from '../../components/ui/Common';
 import { useAuth } from '../../context/AuthContext';
 import { useOffline } from '../../context/OfflineContext';
 import {
@@ -27,8 +24,8 @@ import {
   extractErrorMessage,
   productsApi,
 } from '../../services/api';
-import { downloadDocumentToDevice, shareDocumentRecord } from '../../services/documentHelper';
-import { loadCachedSlice, saveCachedSlice } from '../../services/offlineStore';
+import { downloadDocumentToDevice, shareDocumentRecord } from '../../services/pdfService';
+import { loadCachedSlice, saveCachedSlice } from '../../services/storage';
 import { Palette, Radii, Spacing } from '../../theme/tokens';
 import { DOCUMENT_TYPES, DocumentRecord, DocumentType, Product } from '../../types';
 import { formatFileSize, formatReadableDate } from '../../utils/dateUtils';

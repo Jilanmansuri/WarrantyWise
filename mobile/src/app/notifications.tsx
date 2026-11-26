@@ -8,10 +8,7 @@ import {
   View,
 } from 'react-native';
 import { ActivityIndicator, Switch } from 'react-native-paper';
-import { AppCard } from '../components/ui/AppCard';
-import { EmptyState } from '../components/ui/EmptyState';
-import { ErrorBanner } from '../components/ui/ErrorBanner';
-import { StatusBadge } from '../components/ui/StatusBadge';
+import { AppCard, EmptyState, ErrorBanner, StatusBadge } from '../components/ui/Common';
 import { useAuth } from '../context/AuthContext';
 import {
   authApi,

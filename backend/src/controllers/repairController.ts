@@ -1,13 +1,12 @@
 import { NextFunction, Response } from 'express';
 import { z } from 'zod';
-import { AuthenticatedRequest } from '../middleware/auth';
+import { AuthenticatedRequest } from '../middleware';
 import { DocumentModel } from '../models/Document';
 import { Product } from '../models/Product';
 import { REPAIR_STATUSES, Repair } from '../models/Repair';
 import { resolveProductAccess } from '../services/familyAccessService';
-import { recordProductEvent } from '../services/lifecycleService';
-import { AppError } from '../utils/AppError';
-import { toUtcDateOnly } from '../utils/dateUtils';
+import { recordProductEvent } from '../services/productAnalyticsService';
+import { AppError, toUtcDateOnly } from '../utils';
 
 export const createRepairSchema = z.object({
   productId: z.string().min(1, 'Product ID is required'),

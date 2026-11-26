@@ -9,8 +9,7 @@ import {
 } from 'react-native';
 import { Button, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppCard } from '../../components/ui/AppCard';
-import { ErrorBanner } from '../../components/ui/ErrorBanner';
+import { AppCard, ErrorBanner } from '../../components/ui/Common';
 import { useAuth } from '../../context/AuthContext';
 import { Palette, Radii, Spacing } from '../../theme/tokens';
 

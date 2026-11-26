@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { addMonthsUtc, diffCalendarDays, isLeapYear } from '../src/utils/dateUtils';
-import { calculateWarrantyDates, computeWarrantyMetrics } from '../src/services/warrantyService';
-import { CLAIM_READINESS_DISCLAIMER, evaluateClaimReadiness } from '../src/services/claimReadinessService';
 import { parseInvoiceText } from '../src/services/ocrService';
+import {
+  CLAIM_READINESS_DISCLAIMER,
+  evaluateClaimReadiness,
+} from '../src/services/productAnalyticsService';
+import { calculateWarrantyDates, computeWarrantyMetrics } from '../src/services/warrantyService';
+import { addMonthsUtc, diffCalendarDays, isLeapYear } from '../src/utils';
 
 describe('Leap-year & warranty date calculations', () => {
   it('identifies leap years correctly', () => {

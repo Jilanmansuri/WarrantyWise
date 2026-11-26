@@ -1,5 +1,5 @@
 import { createApp } from './app';
-import { connectDatabase } from './config/db';
+import { connectDatabase } from './config/clients';
 import { env } from './config/env';
 
 async function bootstrap() {

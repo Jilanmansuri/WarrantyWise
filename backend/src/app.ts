@@ -3,18 +3,8 @@ import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { env } from './config/env';
-import { errorHandler, notFoundHandler } from './middleware/errorHandler';
-import amcRoutes from './routes/amcRoutes';
-import authRoutes from './routes/authRoutes';
-import calendarRoutes from './routes/calendarRoutes';
-import claimRoutes from './routes/claimRoutes';
-import dashboardRoutes from './routes/dashboardRoutes';
-import documentRoutes from './routes/documentRoutes';
-import familyRoutes from './routes/familyRoutes';
-import maintenanceRoutes from './routes/maintenanceRoutes';
-import ocrRoutes from './routes/ocrRoutes';
-import productRoutes from './routes/productRoutes';
-import repairRoutes from './routes/repairRoutes';
+import { errorHandler, notFoundHandler } from './middleware';
+import apiRouter from './routes';
 
 export function createApp() {
   const app = express();
@@ -37,17 +27,7 @@ export function createApp() {
     });
   });
 
-  app.use('/api/auth', authRoutes);
-  app.use('/api/products', productRoutes);
-  app.use('/api/repairs', repairRoutes);
-  app.use('/api/documents', documentRoutes);
-  app.use('/api/dashboard', dashboardRoutes);
-  app.use('/api/ocr', ocrRoutes);
-  app.use('/api/amc', amcRoutes);
-  app.use('/api/maintenance', maintenanceRoutes);
-  app.use('/api/claims', claimRoutes);
-  app.use('/api/family', familyRoutes);
-  app.use('/api/calendar', calendarRoutes);
+  app.use('/api', apiRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

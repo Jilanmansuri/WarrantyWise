@@ -11,10 +11,8 @@ import {
   View,
 } from 'react-native';
 import { ActivityIndicator, Button, Chip, Switch, TextInput } from 'react-native-paper';
-import { AppCard } from '../../components/ui/AppCard';
+import { AppCard, ErrorBanner, FormContainer } from '../../components/ui/Common';
 import { DatePickerField } from '../../components/ui/DatePickerField';
-import { ErrorBanner } from '../../components/ui/ErrorBanner';
-import { FormContainer } from '../../components/ui/FormContainer';
 import { useAuth } from '../../context/AuthContext';
 import {
   FileUploadAsset,

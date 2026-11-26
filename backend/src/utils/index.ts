@@ -1,24 +1,56 @@
+import jwt, { SignOptions } from 'jsonwebtoken';
+import { env } from '../config/env';
+
+export class AppError extends Error {
+  public readonly statusCode: number;
+  public readonly code: string;
+  public readonly details?: unknown;
+
+  constructor(message: string, statusCode = 400, code = 'BAD_REQUEST', details?: unknown) {
+    super(message);
+    this.name = 'AppError';
+    this.statusCode = statusCode;
+    this.code = code;
+    this.details = details;
+    Object.setPrototypeOf(this, AppError.prototype);
+  }
+}
+
+export interface JwtPayload {
+  userId: string;
+  email: string;
+}
+
+export function signAuthToken(payload: JwtPayload): string {
+  const options: SignOptions = {
+    expiresIn: env.jwtExpiresIn as SignOptions['expiresIn'],
+  };
+  return jwt.sign(payload, env.jwtSecret, options);
+}
+
+export function verifyAuthToken(token: string): JwtPayload {
+  const decoded = jwt.verify(token, env.jwtSecret);
+  if (typeof decoded === 'string' || !decoded.userId || !decoded.email) {
+    throw new Error('Invalid token payload');
+  }
+  return {
+    userId: String(decoded.userId),
+    email: String(decoded.email),
+  };
+}
+
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
-/**
- * Returns true if the given 4-digit year is a Gregorian leap year.
- */
 export function isLeapYear(year: number): boolean {
   return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
 }
 
-/**
- * Returns the number of days in the specified month (0-indexed: 0 = Jan, 11 = Dec).
- */
 export function daysInMonth(year: number, monthIndex: number): number {
   const days = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   const normalizedMonth = ((monthIndex % 12) + 12) % 12;
   return days[normalizedMonth];
 }
 
-/**
- * Normalizes a Date to UTC midnight (00:00:00.000Z) preserving its UTC year/month/day.
- */
 export function toUtcDateOnly(date: Date | string): Date {
   const d = typeof date === 'string' ? new Date(date) : date;
   if (Number.isNaN(d.getTime())) {
@@ -27,10 +59,6 @@ export function toUtcDateOnly(date: Date | string): Date {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
 }
 
-/**
- * Adds a whole number of calendar months to a date, clamping day-of-month
- * to the target month's length (properly handling Feb 28 / Feb 29 leap years).
- */
 export function addMonthsUtc(startDate: Date | string, months: number): Date {
   const base = toUtcDateOnly(startDate);
   const startYear = base.getUTCFullYear();
@@ -40,15 +68,11 @@ export function addMonthsUtc(startDate: Date | string, months: number): Date {
   const totalMonths = startYear * 12 + startMonth + Math.trunc(months);
   const targetYear = Math.floor(totalMonths / 12);
   const targetMonth = ((totalMonths % 12) + 12) % 12;
-  const maxDay = daysInMonth(targetYear, targetMonth);
-  const clampedDay = Math.min(startDay, maxDay);
+  const clampedDay = Math.min(startDay, daysInMonth(targetYear, targetMonth));
 
   return new Date(Date.UTC(targetYear, targetMonth, clampedDay));
 }
 
-/**
- * Computes signed calendar day difference (toDate - fromDate) in UTC days.
- */
 export function diffCalendarDays(fromDate: Date | string, toDate: Date | string): number {
   const fromUtc = toUtcDateOnly(fromDate).getTime();
   const toUtc = toUtcDateOnly(toDate).getTime();

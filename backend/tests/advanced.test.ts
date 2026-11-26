@@ -8,11 +8,14 @@ process.env.MONGODB_URI = 'mongodb://127.0.0.1:27017/warrantywise_advanced_test'
 process.env.JWT_SECRET = 'test_jwt_secret_advanced';
 
 import { createApp } from '../src/app';
-import { connectDatabase, disconnectDatabase } from '../src/config/db';
+import { connectDatabase, disconnectDatabase } from '../src/config/clients';
 import { parseInvoiceText } from '../src/services/ocrService';
+import {
+  HEALTH_SCORE_DISCLAIMER,
+  analyzeProductOwnershipCost,
+  computeProductHealthScore,
+} from '../src/services/productAnalyticsService';
 import { computeWarrantyMetrics } from '../src/services/warrantyService';
-import { analyzeProductOwnershipCost } from '../src/services/costAnalyzerService';
-import { computeProductHealthScore, HEALTH_SCORE_DISCLAIMER } from '../src/services/healthScoreService';
 
 const app = createApp();
 

@@ -12,11 +12,7 @@ import {
   View,
 } from 'react-native';
 import { ActivityIndicator, Button, Chip, Switch, TextInput } from 'react-native-paper';
-import { AppCard } from '../../components/ui/AppCard';
-import { EmptyState } from '../../components/ui/EmptyState';
-import { ErrorBanner } from '../../components/ui/ErrorBanner';
-import { StatCard } from '../../components/ui/StatCard';
-import { StatusBadge } from '../../components/ui/StatusBadge';
+import { AppCard, EmptyState, ErrorBanner, StatCard, StatusBadge } from '../../components/ui/Common';
 import { extractErrorMessage, familyApi, productsApi } from '../../services/api';
 import { Palette, Radii, Spacing } from '../../theme/tokens';
 import {

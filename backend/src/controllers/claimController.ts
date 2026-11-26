@@ -1,12 +1,12 @@
 import { NextFunction, Response } from 'express';
 import { z } from 'zod';
-import { AuthenticatedRequest } from '../middleware/auth';
+import { AuthenticatedRequest } from '../middleware';
 import { DocumentModel } from '../models/Document';
 import { Product } from '../models/Product';
 import { CLAIM_STATUSES, IClaimChecklistEntry, WarrantyClaim } from '../models/WarrantyClaim';
-import { recordProductEvent } from '../services/lifecycleService';
+import { recordProductEvent } from '../services/productAnalyticsService';
 import { computeWarrantyMetrics } from '../services/warrantyService';
-import { AppError } from '../utils/AppError';
+import { AppError } from '../utils';
 
 export const CLAIM_ASSISTANT_DISCLAIMER =
   'WarrantyWise helps organize your claim documents and checklist, and does not guarantee manufacturer or retailer claim approval.';

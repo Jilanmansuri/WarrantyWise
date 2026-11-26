@@ -10,7 +10,7 @@ import {
   getOfflineQueue,
   saveOfflineQueue,
   setLastSyncedTimestamp,
-} from '../services/offlineStore';
+} from '../services/storage';
 
 interface OfflineContextValue {
   isOnline: boolean;

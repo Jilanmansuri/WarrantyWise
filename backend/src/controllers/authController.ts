@@ -3,12 +3,11 @@ import bcrypt from 'bcryptjs';
 import { NextFunction, Response } from 'express';
 import { z } from 'zod';
 import { env } from '../config/env';
-import { AuthenticatedRequest } from '../middleware/auth';
+import { AuthenticatedRequest } from '../middleware';
 import { FamilyMember } from '../models/FamilyMember';
 import { NotificationPreference } from '../models/NotificationPreference';
 import { User } from '../models/User';
-import { AppError } from '../utils/AppError';
-import { signAuthToken } from '../utils/jwt';
+import { AppError, signAuthToken } from '../utils';
 
 export const registerSchema = z.object({
   name: z.string().trim().min(2, 'Name must be at least 2 characters').max(80),

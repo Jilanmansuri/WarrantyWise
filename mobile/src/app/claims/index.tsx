@@ -12,10 +12,7 @@ import {
   View,
 } from 'react-native';
 import { ActivityIndicator, Button, Chip } from 'react-native-paper';
-import { AppCard } from '../../components/ui/AppCard';
-import { EmptyState } from '../../components/ui/EmptyState';
-import { ErrorBanner } from '../../components/ui/ErrorBanner';
-import { StatusBadge } from '../../components/ui/StatusBadge';
+import { AppCard, EmptyState, ErrorBanner, StatusBadge } from '../../components/ui/Common';
 import { claimsApi, extractErrorMessage } from '../../services/api';
 import { Palette, Radii, Spacing } from '../../theme/tokens';
 import { CLAIM_STATUSES, WarrantyClaimRecord } from '../../types';

@@ -8,7 +8,7 @@ process.env.MONGODB_URI = 'mongodb://127.0.0.1:27017/warrantywise_test';
 process.env.JWT_SECRET = 'test_jwt_secret_for_vitest';
 
 import { createApp } from '../src/app';
-import { connectDatabase, disconnectDatabase } from '../src/config/db';
+import { connectDatabase, disconnectDatabase } from '../src/config/clients';
 
 const app = createApp();
 

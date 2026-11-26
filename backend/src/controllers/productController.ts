@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { NextFunction, Response } from 'express';
 import { z } from 'zod';
-import { AuthenticatedRequest } from '../middleware/auth';
+import { AuthenticatedRequest } from '../middleware';
 import { AMC } from '../models/AMC';
 import { DocumentModel } from '../models/Document';
 import { FamilyMember } from '../models/FamilyMember';
@@ -15,22 +15,21 @@ import {
 import { ProductEvent } from '../models/ProductEvent';
 import { Repair } from '../models/Repair';
 import { WarrantyClaim } from '../models/WarrantyClaim';
-import { evaluateClaimReadiness } from '../services/claimReadinessService';
-import { analyzeProductOwnershipCost } from '../services/costAnalyzerService';
 import { resolveProductAccess } from '../services/familyAccessService';
-import { computeProductHealthScore } from '../services/healthScoreService';
 import {
+  analyzeProductOwnershipCost,
   buildProductLifecycleTimeline,
+  computeProductHealthScore,
+  evaluateClaimReadiness,
   recordProductEvent,
-} from '../services/lifecycleService';
+} from '../services/productAnalyticsService';
 import { deleteFileFromStorage } from '../services/storageService';
 import {
   calculateExtendedWarrantyDates,
   calculateWarrantyDates,
   computeWarrantyMetrics,
 } from '../services/warrantyService';
-import { AppError } from '../utils/AppError';
-import { diffCalendarDays, toUtcDateOnly } from '../utils/dateUtils';
+import { AppError, diffCalendarDays, toUtcDateOnly } from '../utils';
 
 export const createProductSchema = z.object({
   productName: z.string().trim().min(1, 'Product name is required').max(140),

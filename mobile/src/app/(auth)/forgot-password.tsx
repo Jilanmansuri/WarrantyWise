@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppCard } from '../../components/ui/AppCard';
-import { ErrorBanner } from '../../components/ui/ErrorBanner';
+import { AppCard, ErrorBanner } from '../../components/ui/Common';
 import { authApi, extractErrorMessage } from '../../services/api';
 import { Palette, Radii, Spacing } from '../../theme/tokens';
 

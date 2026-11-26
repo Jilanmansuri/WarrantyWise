@@ -1,7 +1,7 @@
 import { NextFunction, Response } from 'express';
-import { AuthenticatedRequest } from '../middleware/auth';
+import { AuthenticatedRequest } from '../middleware';
 import { parseInvoiceText, runInvoiceOcr } from '../services/ocrService';
-import { AppError } from '../utils/AppError';
+import { AppError } from '../utils';
 
 export async function parseInvoiceImage(
   req: AuthenticatedRequest,

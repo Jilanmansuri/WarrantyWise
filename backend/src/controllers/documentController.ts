@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { NextFunction, Response } from 'express';
-import { AuthenticatedRequest } from '../middleware/auth';
+import { AuthenticatedRequest } from '../middleware';
 import { AMC } from '../models/AMC';
 import { DOCUMENT_TYPES, DocumentModel, DocumentType } from '../models/Document';
 import { Product } from '../models/Product';
@@ -12,7 +12,7 @@ import {
   resolveLocalFilePath,
   uploadFileToStorage,
 } from '../services/storageService';
-import { AppError } from '../utils/AppError';
+import { AppError } from '../utils';
 
 export async function uploadDocument(
   req: AuthenticatedRequest,

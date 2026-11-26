@@ -1,9 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
-import { cloudinary, isCloudinaryConfigured } from '../config/cloudinary';
+import { cloudinary, isCloudinaryConfigured } from '../config/clients';
 import { env } from '../config/env';
-import { AppError } from '../utils/AppError';
+import { AppError } from '../utils';
 
 export interface StoredFileResult {
   storageProvider: 'cloudinary' | 'local';

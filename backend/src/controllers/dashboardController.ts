@@ -1,5 +1,5 @@
 import { NextFunction, Response } from 'express';
-import { AuthenticatedRequest } from '../middleware/auth';
+import { AuthenticatedRequest } from '../middleware';
 import { AMC } from '../models/AMC';
 import { DocumentModel } from '../models/Document';
 import { Maintenance } from '../models/Maintenance';
@@ -7,7 +7,7 @@ import { Product } from '../models/Product';
 import { ProductEvent } from '../models/ProductEvent';
 import { Repair } from '../models/Repair';
 import { WarrantyClaim } from '../models/WarrantyClaim';
-import { diffCalendarDays } from '../utils/dateUtils';
+import { diffCalendarDays } from '../utils';
 import { computeAmcStatus } from './amcController';
 import { serializeProduct } from './productController';
 

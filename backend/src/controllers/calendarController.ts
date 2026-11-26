@@ -1,5 +1,5 @@
 import { NextFunction, Response } from 'express';
-import { AuthenticatedRequest } from '../middleware/auth';
+import { AuthenticatedRequest } from '../middleware';
 import { AMC } from '../models/AMC';
 import { Maintenance } from '../models/Maintenance';
 import { Product } from '../models/Product';

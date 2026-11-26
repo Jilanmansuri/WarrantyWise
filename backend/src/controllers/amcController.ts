@@ -1,12 +1,11 @@
 import { NextFunction, Response } from 'express';
 import { z } from 'zod';
-import { AuthenticatedRequest } from '../middleware/auth';
+import { AuthenticatedRequest } from '../middleware';
 import { AMC, AmcStatus } from '../models/AMC';
 import { DocumentModel } from '../models/Document';
 import { Product } from '../models/Product';
-import { recordProductEvent } from '../services/lifecycleService';
-import { AppError } from '../utils/AppError';
-import { addMonthsUtc, diffCalendarDays, toUtcDateOnly } from '../utils/dateUtils';
+import { recordProductEvent } from '../services/productAnalyticsService';
+import { AppError, addMonthsUtc, diffCalendarDays, toUtcDateOnly } from '../utils';
 
 export const createAmcSchema = z.object({
   productId: z.string().min(1, 'Product ID is required'),

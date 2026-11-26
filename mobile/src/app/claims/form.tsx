@@ -4,10 +4,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ActivityIndicator, Button, Checkbox, Chip, TextInput } from 'react-native-paper';
-import { AppCard } from '../../components/ui/AppCard';
-import { ErrorBanner } from '../../components/ui/ErrorBanner';
-import { FormContainer } from '../../components/ui/FormContainer';
-import { StatusBadge } from '../../components/ui/StatusBadge';
+import { AppCard, ErrorBanner, FormContainer, StatusBadge } from '../../components/ui/Common';
 import {
   claimsApi,
   documentsApi,

@@ -3,10 +3,8 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ActivityIndicator, Button, Chip, TextInput } from 'react-native-paper';
-import { AppCard } from '../../components/ui/AppCard';
+import { AppCard, ErrorBanner, FormContainer } from '../../components/ui/Common';
 import { DatePickerField } from '../../components/ui/DatePickerField';
-import { ErrorBanner } from '../../components/ui/ErrorBanner';
-import { FormContainer } from '../../components/ui/FormContainer';
 import {
   FileUploadAsset,
   amcApi,

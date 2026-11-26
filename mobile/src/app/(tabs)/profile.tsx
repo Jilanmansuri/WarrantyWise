@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 import { Button, Switch, TextInput } from 'react-native-paper';
-import { AppCard } from '../../components/ui/AppCard';
+import { AppCard } from '../../components/ui/Common';
 import { useAuth } from '../../context/AuthContext';
 import {
   authApi,

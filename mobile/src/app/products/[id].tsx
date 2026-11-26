@@ -12,22 +12,18 @@ import {
 } from 'react-native';
 import { ActivityIndicator, Button, ProgressBar, TextInput } from 'react-native-paper';
 import QRCode from 'react-native-qrcode-svg';
-import { AppCard } from '../../components/ui/AppCard';
+import { AppCard, EmptyState, ErrorBanner, OfflineBanner, StatusBadge } from '../../components/ui/Common';
 import { CostBreakdownChart } from '../../components/ui/CostBreakdownChart';
-import { EmptyState } from '../../components/ui/EmptyState';
-import { ErrorBanner } from '../../components/ui/ErrorBanner';
-import { OfflineBanner } from '../../components/ui/OfflineBanner';
-import { StatusBadge } from '../../components/ui/StatusBadge';
 import { useAuth } from '../../context/AuthContext';
 import { useOffline } from '../../context/OfflineContext';
 import { extractErrorMessage, productsApi, repairsApi } from '../../services/api';
-import { shareDocumentRecord } from '../../services/documentHelper';
-import { loadCachedSlice, saveCachedSlice } from '../../services/offlineStore';
 import {
   generateResalePacketPdf,
   generateSingleProductPdf,
+  shareDocumentRecord,
   sharePdfFile,
 } from '../../services/pdfService';
+import { loadCachedSlice, saveCachedSlice } from '../../services/storage';
 import { Palette, Radii, Spacing } from '../../theme/tokens';
 import { Product } from '../../types';
 import { formatCurrency, formatFileSize, formatReadableDate } from '../../utils/dateUtils';

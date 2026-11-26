@@ -1,11 +1,11 @@
 import { NextFunction, Response } from 'express';
 import { z } from 'zod';
-import { AuthenticatedRequest } from '../middleware/auth';
+import { AuthenticatedRequest } from '../middleware';
 import { FAMILY_RELATIONSHIPS, FamilyMember } from '../models/FamilyMember';
 import { Product } from '../models/Product';
 import { User } from '../models/User';
 import { computeWarrantyMetrics } from '../services/warrantyService';
-import { AppError } from '../utils/AppError';
+import { AppError } from '../utils';
 
 export const familyMemberSchema = z.object({
   name: z.string().trim().min(2, 'Member name is required').max(80),
