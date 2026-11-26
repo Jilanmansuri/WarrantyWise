@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import mongoose, { Document as MongooseDocument, Schema, Types } from 'mongoose';
 
 export const PRODUCT_CATEGORIES = [
@@ -12,6 +13,15 @@ export const PRODUCT_CATEGORIES = [
 ] as const;
 
 export type ProductCategory = (typeof PRODUCT_CATEGORIES)[number];
+
+export const LIFECYCLE_STATUSES = [
+  'Active',
+  'Listed for Resale',
+  'Resold',
+  'Disposed',
+] as const;
+
+export type LifecycleStatus = (typeof LIFECYCLE_STATUSES)[number];
 
 export interface IProduct extends MongooseDocument {
   userId: Types.ObjectId;
@@ -28,6 +38,35 @@ export interface IProduct extends MongooseDocument {
   warrantyDurationMonths: number;
   warrantyStartDate: Date;
   warrantyEndDate: Date;
+  // Extended Warranty
+  extendedWarrantyProvider?: string;
+  extendedWarrantyMonths?: number;
+  extendedWarrantyCost?: number;
+  extendedWarrantyStartDate?: Date;
+  extendedWarrantyEndDate?: Date;
+  extendedWarrantyNotes?: string;
+  // Warranty Transfer & Resale / Disposal Lifecycle
+  warrantyTransferable: boolean;
+  transferredToName?: string;
+  transferredToEmail?: string;
+  transferredAt?: Date;
+  lifecycleStatus: LifecycleStatus;
+  resalePrice?: number;
+  resaleDate?: Date;
+  resaleBuyerName?: string;
+  disposalDate?: Date;
+  disposalMethod?: string;
+  disposalNotes?: string;
+  // Family Vault Assignment
+  familyMemberId?: Types.ObjectId;
+  sharedWithFamily: boolean;
+  // QR Product Identity
+  qrToken: string;
+  qrGeneratedAt: Date;
+  // Offline Sync & Conflict Tracking
+  clientMutationId?: string;
+  version: number;
+  // Media & Notes
   productImageUrl?: string;
   productImageDocumentId?: Types.ObjectId;
   invoiceDocumentId?: Types.ObjectId;
@@ -110,6 +149,106 @@ const productSchema = new Schema<IProduct>(
       type: Date,
       required: [true, 'Warranty end date is required'],
     },
+    extendedWarrantyProvider: {
+      type: String,
+      trim: true,
+      maxlength: [120, 'Extended warranty provider cannot exceed 120 characters'],
+    },
+    extendedWarrantyMonths: {
+      type: Number,
+      min: [0, 'Extended warranty months cannot be negative'],
+      max: [600, 'Extended warranty months cannot exceed 600'],
+    },
+    extendedWarrantyCost: {
+      type: Number,
+      min: [0, 'Extended warranty cost cannot be negative'],
+    },
+    extendedWarrantyStartDate: {
+      type: Date,
+    },
+    extendedWarrantyEndDate: {
+      type: Date,
+    },
+    extendedWarrantyNotes: {
+      type: String,
+      trim: true,
+      maxlength: [1000, 'Extended warranty notes cannot exceed 1000 characters'],
+    },
+    warrantyTransferable: {
+      type: Boolean,
+      default: false,
+    },
+    transferredToName: {
+      type: String,
+      trim: true,
+      maxlength: 100,
+    },
+    transferredToEmail: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      maxlength: 120,
+    },
+    transferredAt: {
+      type: Date,
+    },
+    lifecycleStatus: {
+      type: String,
+      enum: LIFECYCLE_STATUSES,
+      default: 'Active',
+    },
+    resalePrice: {
+      type: Number,
+      min: 0,
+    },
+    resaleDate: {
+      type: Date,
+    },
+    resaleBuyerName: {
+      type: String,
+      trim: true,
+      maxlength: 100,
+    },
+    disposalDate: {
+      type: Date,
+    },
+    disposalMethod: {
+      type: String,
+      trim: true,
+      maxlength: 120,
+    },
+    disposalNotes: {
+      type: String,
+      trim: true,
+      maxlength: 1000,
+    },
+    familyMemberId: {
+      type: Schema.Types.ObjectId,
+      ref: 'FamilyMember',
+      index: true,
+    },
+    sharedWithFamily: {
+      type: Boolean,
+      default: false,
+    },
+    qrToken: {
+      type: String,
+      unique: true,
+      sparse: true,
+      default: () => `WW-${crypto.randomBytes(12).toString('hex')}`,
+    },
+    qrGeneratedAt: {
+      type: Date,
+      default: () => new Date(),
+    },
+    clientMutationId: {
+      type: String,
+      trim: true,
+    },
+    version: {
+      type: Number,
+      default: 1,
+    },
     productImageUrl: {
       type: String,
       trim: true,
@@ -135,5 +274,7 @@ productSchema.index({ userId: 1, purchaseDate: -1 });
 productSchema.index({ userId: 1, warrantyEndDate: 1 });
 productSchema.index({ userId: 1, category: 1 });
 productSchema.index({ userId: 1, createdAt: -1 });
+productSchema.index({ userId: 1, familyMemberId: 1 });
+productSchema.index({ userId: 1, clientMutationId: 1 }, { sparse: true });
 
 export const Product = mongoose.model<IProduct>('Product', productSchema);

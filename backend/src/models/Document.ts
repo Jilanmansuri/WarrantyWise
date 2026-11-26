@@ -4,6 +4,8 @@ export const DOCUMENT_TYPES = [
   'Purchase Invoice',
   'Warranty Certificate',
   'Repair Invoice',
+  'AMC Contract',
+  'Claim Document',
   'Other',
 ] as const;
 
@@ -13,6 +15,8 @@ export interface IDocumentRecord extends MongooseDocument {
   userId: Types.ObjectId;
   productId?: Types.ObjectId;
   repairId?: Types.ObjectId;
+  amcId?: Types.ObjectId;
+  claimId?: Types.ObjectId;
   title: string;
   type: DocumentType;
   fileName: string;
@@ -42,6 +46,14 @@ const documentSchema = new Schema<IDocumentRecord>(
     repairId: {
       type: Schema.Types.ObjectId,
       ref: 'Repair',
+    },
+    amcId: {
+      type: Schema.Types.ObjectId,
+      ref: 'AMC',
+    },
+    claimId: {
+      type: Schema.Types.ObjectId,
+      ref: 'WarrantyClaim',
     },
     title: {
       type: String,

@@ -4,6 +4,8 @@ import { AuthenticatedRequest } from '../middleware/auth';
 import { DocumentModel } from '../models/Document';
 import { Product } from '../models/Product';
 import { REPAIR_STATUSES, Repair } from '../models/Repair';
+import { resolveProductAccess } from '../services/familyAccessService';
+import { recordProductEvent } from '../services/lifecycleService';
 import { AppError } from '../utils/AppError';
 import { toUtcDateOnly } from '../utils/dateUtils';
 
@@ -62,6 +64,16 @@ export async function createRepair(
       await invoiceDoc.save();
     }
 
+    await recordProductEvent({
+      userId,
+      productId: product._id,
+      eventType: 'REPAIR_LOGGED',
+      title: `Repair Logged: ${body.problemDescription}`,
+      description: `${body.repairCenter} • ${body.repairStatus}`,
+      amount: body.repairCost ?? 0,
+      eventDate: repair.repairDate,
+    });
+
     res.status(201).json({
       success: true,
       data: repair,
@@ -80,12 +92,12 @@ export async function getRepairsByProduct(
     const userId = req.userId!;
     const { productId } = req.params;
 
-    const product = await Product.findOne({ _id: productId, userId });
-    if (!product) {
-      throw new AppError('Product not found.', 404, 'PRODUCT_NOT_FOUND');
-    }
+    const access = await resolveProductAccess(productId, userId);
 
-    const repairs = await Repair.find({ userId, productId }).sort({ repairDate: -1, createdAt: -1 });
+    const repairs = await Repair.find({ productId: access.product._id }).sort({
+      repairDate: -1,
+      createdAt: -1,
+    });
     res.json({
       success: true,
       data: repairs,

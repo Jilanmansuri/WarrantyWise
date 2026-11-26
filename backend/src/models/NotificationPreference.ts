@@ -7,6 +7,9 @@ export interface INotificationPreference extends MongooseDocument {
   remind7Days: boolean;
   remind1Day: boolean;
   notifyNewProduct: boolean;
+  amcRenewalAlerts: boolean;
+  maintenanceReminders: boolean;
+  familySharedReminders: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -18,7 +21,6 @@ const notificationPreferenceSchema = new Schema<INotificationPreference>(
       ref: 'User',
       required: true,
       unique: true,
-      index: true,
     },
     enabled: {
       type: Boolean,
@@ -37,6 +39,18 @@ const notificationPreferenceSchema = new Schema<INotificationPreference>(
       default: true,
     },
     notifyNewProduct: {
+      type: Boolean,
+      default: true,
+    },
+    amcRenewalAlerts: {
+      type: Boolean,
+      default: true,
+    },
+    maintenanceReminders: {
+      type: Boolean,
+      default: true,
+    },
+    familySharedReminders: {
       type: Boolean,
       default: true,
     },
