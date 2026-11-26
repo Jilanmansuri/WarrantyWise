@@ -1,9 +1,12 @@
 import fs from 'fs';
 import { NextFunction, Response } from 'express';
 import { AuthenticatedRequest } from '../middleware/auth';
+import { AMC } from '../models/AMC';
 import { DOCUMENT_TYPES, DocumentModel, DocumentType } from '../models/Document';
 import { Product } from '../models/Product';
 import { Repair } from '../models/Repair';
+import { WarrantyClaim } from '../models/WarrantyClaim';
+import { resolveProductAccess } from '../services/familyAccessService';
 import {
   deleteFileFromStorage,
   resolveLocalFilePath,
@@ -30,6 +33,8 @@ export async function uploadDocument(
     const title = String(req.body.title || file.originalname || 'Uploaded Document').trim();
     const productId = req.body.productId ? String(req.body.productId) : undefined;
     const repairId = req.body.repairId ? String(req.body.repairId) : undefined;
+    const amcId = req.body.amcId ? String(req.body.amcId) : undefined;
+    const claimId = req.body.claimId ? String(req.body.claimId) : undefined;
 
     if (productId) {
       const ownedProduct = await Product.findOne({ _id: productId, userId });
@@ -45,6 +50,20 @@ export async function uploadDocument(
       }
     }
 
+    if (amcId) {
+      const ownedAmc = await AMC.findOne({ _id: amcId, userId });
+      if (!ownedAmc) {
+        throw new AppError('Associated AMC contract not found.', 404, 'AMC_NOT_FOUND');
+      }
+    }
+
+    if (claimId) {
+      const ownedClaim = await WarrantyClaim.findOne({ _id: claimId, userId });
+      if (!ownedClaim) {
+        throw new AppError('Associated warranty claim not found.', 404, 'CLAIM_NOT_FOUND');
+      }
+    }
+
     const stored = await uploadFileToStorage({
       buffer: file.buffer,
       originalName: file.originalname,
@@ -57,6 +76,8 @@ export async function uploadDocument(
       userId,
       productId,
       repairId,
+      amcId,
+      claimId,
       title,
       type,
       fileName: file.originalname,
@@ -70,7 +91,11 @@ export async function uploadDocument(
 
     if (productId && type === 'Purchase Invoice') {
       await Product.updateOne(
-        { _id: productId, userId, invoiceDocumentId: { $exists: false } },
+        {
+          _id: productId,
+          userId,
+          $or: [{ invoiceDocumentId: { $exists: false } }, { invoiceDocumentId: null }],
+        },
         { $set: { invoiceDocumentId: doc._id } }
       );
     }
@@ -121,10 +146,20 @@ export async function downloadDocument(
 ): Promise<void> {
   try {
     const userId = req.userId!;
-    const doc = await DocumentModel.findOne({ _id: req.params.id, userId });
+    const doc = await DocumentModel.findById(req.params.id);
 
     if (!doc) {
       throw new AppError('Document not found.', 404, 'DOCUMENT_NOT_FOUND');
+    }
+
+    if (doc.userId.toString() !== userId) {
+      if (!doc.productId) {
+        throw new AppError('Document not found.', 404, 'DOCUMENT_NOT_FOUND');
+      }
+      const access = await resolveProductAccess(doc.productId.toString(), userId);
+      if (!access.canViewDocuments) {
+        throw new AppError('Document not found.', 404, 'DOCUMENT_NOT_FOUND');
+      }
     }
 
     if (doc.storageProvider === 'local') {
@@ -171,6 +206,14 @@ export async function deleteDocument(
       Repair.updateMany(
         { userId, repairInvoiceDocumentId: doc._id },
         { $unset: { repairInvoiceDocumentId: '', repairInvoiceUrl: '' } }
+      ),
+      AMC.updateMany(
+        { userId, contractDocumentId: doc._id },
+        { $unset: { contractDocumentId: '' } }
+      ),
+      WarrantyClaim.updateMany(
+        { userId, supportingDocumentIds: doc._id },
+        { $pull: { supportingDocumentIds: doc._id } }
       ),
       DocumentModel.deleteOne({ _id: doc._id, userId }),
     ]);

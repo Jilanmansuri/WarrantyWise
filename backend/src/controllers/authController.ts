@@ -4,6 +4,7 @@ import { NextFunction, Response } from 'express';
 import { z } from 'zod';
 import { env } from '../config/env';
 import { AuthenticatedRequest } from '../middleware/auth';
+import { FamilyMember } from '../models/FamilyMember';
 import { NotificationPreference } from '../models/NotificationPreference';
 import { User } from '../models/User';
 import { AppError } from '../utils/AppError';
@@ -46,6 +47,9 @@ export const notificationPrefSchema = z.object({
   remind7Days: z.boolean().optional(),
   remind1Day: z.boolean().optional(),
   notifyNewProduct: z.boolean().optional(),
+  amcRenewalAlerts: z.boolean().optional(),
+  maintenanceReminders: z.boolean().optional(),
+  familySharedReminders: z.boolean().optional(),
 });
 
 function sanitizeUser(user: InstanceType<typeof User>) {
@@ -91,7 +95,16 @@ export async function register(
       remind7Days: true,
       remind1Day: true,
       notifyNewProduct: true,
+      amcRenewalAlerts: true,
+      maintenanceReminders: true,
+      familySharedReminders: true,
     });
+
+    // Link any pending family member invitations for this email
+    await FamilyMember.updateMany(
+      { email: user.email, linkedUserId: { $exists: false } },
+      { $set: { linkedUserId: user._id } }
+    );
 
     const token = signAuthToken({ userId: user._id.toString(), email: user.email });
 
@@ -130,6 +143,11 @@ export async function login(
     if (!preferences) {
       preferences = await NotificationPreference.create({ userId: user._id });
     }
+
+    await FamilyMember.updateMany(
+      { email: user.email, linkedUserId: { $exists: false } },
+      { $set: { linkedUserId: user._id } }
+    );
 
     const token = signAuthToken({ userId: user._id.toString(), email: user.email });
 
