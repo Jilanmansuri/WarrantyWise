@@ -11,9 +11,14 @@ export interface ParsedInvoiceResult {
     candidateDates: string[];
     productName?: string;
     brand?: string;
+    modelNumber?: string;
+    serialNumber?: string;
     amount?: number;
     currency?: string;
     sellerName?: string;
+    warrantyDurationMonths?: number;
+    warrantySummary?: string;
+    extendedWarrantyMonths?: number;
   };
   requiresUserVerification: true;
   verificationNotice: string;
@@ -287,6 +292,52 @@ export function parseInvoiceText(rawText: string, confidence = 0, ocrEngine: 'te
     }
   }
 
+  // 7. Model & Serial Number
+  let modelNumber: string | undefined;
+  const modelMatch = rawText.match(/(?:model\s*(?:no|number|#)?)\s*[:.\s-]*([A-Z0-9][A-Z0-9-_/]{2,30})/i);
+  if (modelMatch?.[1]) {
+    modelNumber = modelMatch[1].trim();
+  }
+
+  let serialNumber: string | undefined;
+  const serialMatch = rawText.match(
+    /(?:serial\s*(?:no|number|#)?|s\/n|imei)\s*[:.\s-]*([A-Z0-9][A-Z0-9-]{4,35})/i
+  );
+  if (serialMatch?.[1]) {
+    serialNumber = serialMatch[1].trim();
+  }
+
+  // 8. Standard & Extended Warranty Detection
+  let warrantyDurationMonths: number | undefined;
+  let warrantySummary: string | undefined;
+  let extendedWarrantyMonths: number | undefined;
+
+  const yearWarrantyMatch = rawText.match(
+    /(\d{1,2})\s*[-\s]?(?:year|yr)s?\s*(?:manufacturer|standard|limited)?\s*warranty/i
+  );
+  const monthWarrantyMatch = rawText.match(
+    /(\d{1,3})\s*[-\s]?(?:month|mo)s?\s*(?:manufacturer|standard|limited)?\s*warranty/i
+  );
+  if (yearWarrantyMatch?.[1]) {
+    warrantyDurationMonths = Number(yearWarrantyMatch[1]) * 12;
+    warrantySummary = yearWarrantyMatch[0].trim();
+  } else if (monthWarrantyMatch?.[1]) {
+    warrantyDurationMonths = Number(monthWarrantyMatch[1]);
+    warrantySummary = monthWarrantyMatch[0].trim();
+  }
+
+  const extYearMatch = rawText.match(
+    /(?:extended\s*warranty|protection\s*plan|applecare\+?)\s*(?:for|of|:|-)?\s*(\d{1,2})\s*(?:year|yr)s?/i
+  );
+  const extMonthMatch = rawText.match(
+    /(?:extended\s*warranty|protection\s*plan)\s*(?:for|of|:|-)?\s*(\d{1,3})\s*(?:month|mo)s?/i
+  );
+  if (extYearMatch?.[1]) {
+    extendedWarrantyMonths = Number(extYearMatch[1]) * 12;
+  } else if (extMonthMatch?.[1]) {
+    extendedWarrantyMonths = Number(extMonthMatch[1]);
+  }
+
   return {
     rawText,
     ocrEngine,
@@ -297,13 +348,18 @@ export function parseInvoiceText(rawText: string, confidence = 0, ocrEngine: 'te
       candidateDates,
       productName,
       brand,
+      modelNumber,
+      serialNumber,
       amount,
       currency,
       sellerName,
+      warrantyDurationMonths,
+      warrantySummary,
+      extendedWarrantyMonths,
     },
     requiresUserVerification: true,
     verificationNotice:
-      'Please verify all extracted fields—especially the Purchase Date—before saving, as invoices often contain multiple dates (order, invoice, print, or due dates).',
+      'Please verify all extracted fields—especially the Purchase Date and detected Warranty duration—before saving, as invoices often contain multiple dates or promotional terms.',
   };
 }
 
